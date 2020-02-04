@@ -75,7 +75,6 @@ impl Walnut {
             offset: None,
             count: None,
         };
-        println!("{:#?}  {:#?}", pairs, pairs.get(&self.param_names.filter));
         
         if let Some(filter) = pairs.get(&self.param_names.filter) {
             param.filter = Some(parse_filter(filter)?);
@@ -134,7 +133,13 @@ fn parse_sort_column(exp: &str) -> Result<String, Error> {
     }
     let mut parts: Vec<&str> = exp.split('.').collect();
     if parts.len() == 1 {
-        parts.push("asc");
+        let first = parts[0];
+        if first.starts_with('-') {
+            std::mem::replace(&mut parts[0], &first[1..]);
+            parts.push("desc");
+        } else {
+            parts.push("asc");
+        }
     }
     if parts.len() != 2 {
         return Err(Error::General("wrong sort format".into()));
